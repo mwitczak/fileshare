@@ -8,6 +8,7 @@ import {
   Link,
 } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
+import { Upload } from './components/Upload';
 
 function App () {
   return (
@@ -18,7 +19,7 @@ function App () {
           <div className={'content'}>
             <Switch>
               <Route exact path="/">
-                /
+                <Upload />
               </Route>
               <Route exact path="/about">
                 About

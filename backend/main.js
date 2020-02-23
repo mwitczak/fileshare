@@ -5,6 +5,9 @@ const crypto = require('crypto');
 const { UniqueTokenStrategy } = require('passport-unique-token');
 const Sequelize = require('sequelize');
 const cors = require('cors');
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const app = express();
 app.use(express.json());
@@ -38,7 +41,7 @@ const authenticate = (req, res, next) => {
     }
 
     if (!user) {
-      res.status(401).json({ message: 'Incorrect token credentials' });
+      return res.status(401).json({ message: 'Incorrect token credentials' });
     }
 
     req.user = user;
@@ -95,6 +98,15 @@ app.post('/register', async (req, res) => {
       replacements: [username, passwordHash.generate(password)],
       type: Sequelize.QueryTypes.INSERT,
     });
+
+  res.sendStatus(200);
+});
+
+app.post('/upload', authenticate, upload.single('image'), async (req, res) => {
+  console.log('req.file', req.file);
+  await sequelize.query(
+    'INSERT INTO files (user, file, originalname, mimetype) VALUES (?, BINARY(?), ?, ?)',
+    { replacements: [req.user.user, req.file.buffer, req.file.originalname, req.file.mimetype], type: sequelize.QueryTypes.INSERT });
 
   res.sendStatus(200);
 });
