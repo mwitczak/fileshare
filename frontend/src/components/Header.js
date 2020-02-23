@@ -8,41 +8,37 @@ import { UserContext } from '../contexts/UserContext';
 import axios from 'axios';
 
 export const Header = () => {
-    useEffect(() => {
-        async function getData () {
-          console.log('getData');
-          try {
-            if (token) {
-              const user = await axios.get('http://localhost:8080/user',
-                { headers: { token } });
-              setUser(user);
-              console.log('user', user);
-            }
-          } catch (e) {
-            setUser(null);
-            console.log('e', e);
-          }
-        }
-
-        //getData();
-      },
-    );
-
     const logIn = () => {
-      async function postLogin () {
+      async function logInAsync () {
         try {
           const loginResponse = await axios.post('http://localhost:8080/login',
             { username, password });
           setToken(loginResponse.data.token);
-
-          const userResponse = await axios.get('http://localhost:8080/user',
-            { headers: { token: loginResponse.data.token } });
-          setUser(userResponse.data);
         } catch (e) {
           console.log('e', e);
         }
       };
-      postLogin();
+      logInAsync();
+    };
+
+    const logOut = () => {
+      setToken(null);
+      setUser(null);
+    };
+
+    const register = () => {
+      async function registerAsync () {
+        try {
+          await axios.post('http://localhost:8080/register',
+            { username, password });
+
+          await axios.post('http://localhost:8080/login',
+            { username, password });
+        } catch (e) {
+          console.log('e', e);
+        }
+      };
+      registerAsync();
     };
 
     const [username, setUsername] = useState(null);
@@ -52,7 +48,7 @@ export const Header = () => {
 
     const Test = () => {
       if (user) {
-        return <div>Hello {user.name}!</div>;
+        return <div>Hello {user.name}!<Button onClick={logOut}>Logout</Button></div>;
       }
       return null;
     };
@@ -72,7 +68,7 @@ export const Header = () => {
           onChange={e => setPassword(e.target.value)}
         />
         <Button variant={'primary'} onClick={logIn}>Login</Button>
-        <Button variant={'secondary'}>Register</Button>
+        <Button variant={'secondary'} onClick={register}>Register</Button>
       </Form>
     );
 
