@@ -1,40 +1,38 @@
 const express = require('express');
+const passport = require('passport');
+const passwordHash = require('password-hash');
+const crypto = require('crypto');
+const { UniqueTokenStrategy } = require('passport-unique-token');
+const Sequelize = require('sequelize');
+const cors = require('cors');
+
 const app = express();
 app.use(express.json());
+app.use(cors());
 const port = 8080;
-const passport = require('passport');
-var passwordHash = require('password-hash');
-const crypto = require('crypto');
-
-const { UniqueTokenStrategy } = require('passport-unique-token');
-
-const strategyOptions = {
-  failOnMissing: true,
-};
-
-const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize('instashare', 'root', 'example', {
   host: 'db',
   dialect: 'mysql',
 });
 
-passport.use(new UniqueTokenStrategy(strategyOptions,
+passport.use(new UniqueTokenStrategy({
+    failOnMissing: true,
+  },
   async (token, done) => {
     const user = await sequelize.query(
       'SELECT * FROM users u LEFT JOIN tokens t ON t.user = u.id WHERE t.token = ?',
       { replacements: [token], type: sequelize.QueryTypes.SELECT });
 
-    if (user.lenght === 0) {
+    if (user.length === 0) {
       return done(null, false);
     }
 
     return done(null, user[0]);
   }));
 
-function authenticate (req, res, next) {
+const authenticate = (req, res, next) => {
   passport.authenticate('token', (err, user, info) => {
-    console.log('user', user);
     if (err) {
       return next(err);
     }
@@ -46,7 +44,7 @@ function authenticate (req, res, next) {
     req.user = user;
     next();
   })(req, res, next);
-}
+};
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
@@ -78,7 +76,7 @@ app.post('/login', async (req, res) => {
   await sequelize.query('INSERT INTO tokens (token, user) VALUES (?, ?)',
     { replacements: [token, user.id], type: Sequelize.QueryTypes.INSERT });
 
-  res.sendStatus(200);
+  res.send({ token: token }, 200);
 });
 
 app.post('/register', async (req, res) => {
@@ -89,11 +87,14 @@ app.post('/register', async (req, res) => {
     { replacements: [username], type: sequelize.QueryTypes.SELECT });
 
   if (users.length === 1) {
-    res.send({ error: 'User already exists'}, 422);
+    res.send({ error: 'User already exists' }, 422);
   }
 
   await sequelize.query('INSERT INTO users (username, password) VALUES (?, ?)',
-    { replacements: [username, passwordHash.generate(password)], type: Sequelize.QueryTypes.INSERT });
+    {
+      replacements: [username, passwordHash.generate(password)],
+      type: Sequelize.QueryTypes.INSERT,
+    });
 
   res.sendStatus(200);
 });
