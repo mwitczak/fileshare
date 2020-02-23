@@ -106,9 +106,32 @@ app.post('/upload', authenticate, upload.single('image'), async (req, res) => {
   console.log('req.file', req.file);
   await sequelize.query(
     'INSERT INTO files (user, file, originalname, mimetype) VALUES (?, BINARY(?), ?, ?)',
-    { replacements: [req.user.user, req.file.buffer, req.file.originalname, req.file.mimetype], type: sequelize.QueryTypes.INSERT });
+    {
+      replacements: [
+        req.user.user,
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype], type: sequelize.QueryTypes.INSERT,
+    });
 
   res.sendStatus(200);
+});
+
+app.get('/files', authenticate, async (req, res) => {
+  const files = await sequelize.query(
+    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size FROM files f WHERE f.user = ?',
+    { replacements: [req.user.user], type: sequelize.QueryTypes.SELECT });
+
+  res.send(files);
+});
+
+app.get('/files/:id', async (req, res) => {
+  const files = await sequelize.query(
+    'SELECT file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE f.id = ?',
+    { replacements: [req.param('id')], type: sequelize.QueryTypes.SELECT });
+  res.attachment(files[0].originalname).
+    type(files[0].mimetype).
+    send(files[0].file);
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
