@@ -49,7 +49,7 @@ const authenticate = (req, res, next) => {
   })(req, res, next);
 };
 
-app.get('/', (req, res) => res.send('Hello World!'));
+app.get('/', (req, res) => res.send('Instashare backend.'));
 
 app.get('/user', authenticate, async (req, res) => {
   res.send(req.user, 200);
@@ -102,8 +102,8 @@ app.post('/register', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.post('/upload', authenticate, upload.single('image'), async (req, res) => {
-  console.log('req.file', req.file);
+app.post('/user/files', authenticate, upload.single('image'), async (req, res) => {
+  sequelize.options.logging = false;
   await sequelize.query(
     'INSERT INTO files (user, file, originalname, mimetype) VALUES (?, BINARY(?), ?, ?)',
     {
@@ -113,14 +113,29 @@ app.post('/upload', authenticate, upload.single('image'), async (req, res) => {
         req.file.originalname,
         req.file.mimetype], type: sequelize.QueryTypes.INSERT,
     });
-
+  sequelize.options.logging = true;
   res.sendStatus(200);
 });
 
-app.get('/files', authenticate, async (req, res) => {
+app.get('/user/files', authenticate, async (req, res) => {
   const files = await sequelize.query(
     'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size FROM files f WHERE f.user = ?',
     { replacements: [req.user.user], type: sequelize.QueryTypes.SELECT });
+
+  res.send(files);
+});
+
+app.delete('/user/files/:id', authenticate, async (req, res) => {
+  await sequelize.query(
+    'DELETE FROM files f WHERE f.id = ? AND f.user = ?',
+    { replacements: [req.param('id'), req.user.user], type: sequelize.QueryTypes.DELETE });
+  res.sendStatus(200);
+});
+
+app.get('/files', async (req, res) => {
+  const files = await sequelize.query(
+    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size FROM files f',
+    { type: sequelize.QueryTypes.SELECT });
 
   res.send(files);
 });
@@ -134,4 +149,4 @@ app.get('/files/:id', async (req, res) => {
     send(files[0].file);
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`Instashare listening on port ${port}!`));

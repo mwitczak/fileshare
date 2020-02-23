@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { Upload } from './components/Upload';
+import { PublicFileTable } from './components/PublicFileTable';
 
 function App () {
   return (
@@ -19,6 +20,9 @@ function App () {
           <div className={'content'}>
             <Switch>
               <Route exact path="/">
+                <PublicFileTable />
+              </Route>
+              <Route exact path="/user/files">
                 <Upload />
               </Route>
               <Route exact path="/about">
