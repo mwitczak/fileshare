@@ -16,8 +16,23 @@ exports.setup = function(options, seedLink) {
 
 exports.up = function(db, callback) {
   db.createTable('users', {
-    id: { type: 'int', primaryKey: true },
-    name: 'string'
+    id: { type: 'int', primaryKey: true, autoIncrement: true },
+    name: 'string',
+    username: 'string',
+    password: 'string'
+  }, callback);
+  db.createTable('tokens', {
+    id: { type: 'int', primaryKey: true, autoIncrement: true },
+    token: 'string',
+    user: { type: 'int', foreignKey: {
+        name: 'token_user_fk',
+        table: 'users',
+        rules: {
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE'
+        },
+        mapping: 'id'
+      }}
   }, callback);
 };
 
