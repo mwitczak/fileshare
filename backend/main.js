@@ -4,6 +4,7 @@ app.use(express.json());
 const port = 8080;
 const passport = require('passport');
 var passwordHash = require('password-hash');
+const crypto = require('crypto');
 
 const { UniqueTokenStrategy } = require('passport-unique-token');
 
@@ -50,18 +51,20 @@ function authenticate (req, res, next) {
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.get('/user', authenticate, async (req, res) => {
-  const users = await sequelize.query('SELECT * FROM users',
-    { type: Sequelize.QueryTypes.SELECT });
-
-  res.send(users[0], 200);
+  res.send(req.user, 200);
 });
 
 app.post('/login', async (req, res) => {
-  const {username, password} = req.body;
+  const { username, password } = req.body;
 
   const users = await sequelize.query(
     'SELECT * FROM users u WHERE u.username = ?',
     { replacements: [username], type: sequelize.QueryTypes.SELECT });
+
+  if (users.length === 0) {
+    res.sendStatus(403);
+  }
+
   const user = users[0];
 
   const correctCredentials = passwordHash.verify(password, user['password']);
@@ -69,6 +72,28 @@ app.post('/login', async (req, res) => {
   if (!correctCredentials) {
     res.sendStatus(403);
   }
+
+  const token = crypto.randomBytes(32).toString('hex');
+
+  await sequelize.query('INSERT INTO tokens (token, user) VALUES (?, ?)',
+    { replacements: [token, user.id], type: Sequelize.QueryTypes.INSERT });
+
+  res.sendStatus(200);
+});
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  const users = await sequelize.query(
+    'SELECT * FROM users u WHERE u.username = ?',
+    { replacements: [username], type: sequelize.QueryTypes.SELECT });
+
+  if (users.length === 1) {
+    res.send({ error: 'User already exists'}, 422);
+  }
+
+  await sequelize.query('INSERT INTO users (username, password) VALUES (?, ?)',
+    { replacements: [username, passwordHash.generate(password)], type: Sequelize.QueryTypes.INSERT });
 
   res.sendStatus(200);
 });
