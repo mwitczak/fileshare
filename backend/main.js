@@ -128,7 +128,7 @@ app.get('/files/:id', async (req, res) => {
   const fileId = req.param('id');
 
   const files = await db.query(
-    'SELECT file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE f.id = ? AND zipped = true',
+    'SELECT file as content, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE f.id = ? AND zipped = true',
     { replacements: [fileId], type: db.QueryTypes.SELECT });
 
   if (files.length === 0) {
@@ -139,7 +139,7 @@ app.get('/files/:id', async (req, res) => {
 
   res.attachment(file.originalname + '.zip')
     .type('application/zip')
-    .send(file);
+    .send(file.content);
 });
 
 app.patch('/files/:id', authenticate, async (req, res) => {
