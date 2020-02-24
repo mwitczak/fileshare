@@ -40,6 +40,9 @@ exports.up = function (db, callback) {
     zipped: {
       type: 'boolean',
       defaultValue: false
+    },
+    description: {
+      type: 'text'
     }
   }, callback);
 };

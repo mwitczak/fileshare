@@ -137,7 +137,7 @@ app.post('/user/files', authenticate, upload.single('image'),
 
 app.get('/user/files', authenticate, async (req, res) => {
   const files = await sequelize.query(
-    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped FROM files f WHERE f.user = ?',
+    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped, description FROM files f WHERE f.user = ?',
     { replacements: [req.user.user], type: sequelize.QueryTypes.SELECT });
 
   res.send(files);
@@ -155,7 +155,7 @@ app.delete('/user/files/:id', authenticate, async (req, res) => {
 
 app.get('/files', async (req, res) => {
   const files = await sequelize.query(
-    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped FROM files f',
+    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped, description FROM files f',
     { type: sequelize.QueryTypes.SELECT });
 
   res.send(files);
@@ -175,6 +175,21 @@ app.get('/files/:id', async (req, res) => {
     .attachment(files[0].originalname + '.zip').
     type('application/zip').
     send(file);
+});
+
+app.patch('/files/:id', authenticate, async (req, res) => {
+  const { user } = req.user;
+  const id = req.param('id');
+  const { description } = req.body;
+
+  await sequelize.query(
+    'UPDATE files f SET description = ? WHERE f.id = ? AND f.user = ?',
+    {
+      replacements: [description, id, user],
+      type: sequelize.QueryTypes.UPDATE,
+    });
+
+  res.send(200);
 });
 
 app.get('/compress', async (req, res) => {

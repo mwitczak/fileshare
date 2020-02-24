@@ -38,3 +38,11 @@ export const uploadFileCall = async (token, file) => {
     },
   });
 };
+
+export const updateFileCall = async (token, file) => {
+  return await axios.patch(`http://localhost:8080/files/${file.id}`, file, {
+    headers: {
+      token: token,
+    },
+  });
+};
