@@ -36,6 +36,10 @@ exports.up = function (db, callback) {
     },
     mimetype: {
       type: 'string'
+    },
+    zipped: {
+      type: 'boolean',
+      defaultValue: false
     }
   }, callback);
 };

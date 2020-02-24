@@ -144,9 +144,49 @@ app.get('/files/:id', async (req, res) => {
   const files = await sequelize.query(
     'SELECT file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE f.id = ?',
     { replacements: [req.param('id')], type: sequelize.QueryTypes.SELECT });
-  res.attachment(files[0].originalname).
-    type(files[0].mimetype).
-    send(files[0].file);
+
+  const file = files[0].file;
+
+  res
+    //.attachment(files[0].originalname)
+    //type(files[0].mimetype)
+    //send(files[0].file);
+    .attachment(files[0].originalname + ".zip")
+    .type('application/zip')
+    .send(file);
+});
+
+app.get('/compress', async (req, res) => {
+  const files = await sequelize.query(
+    'SELECT id, file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE zipped = false',
+    { type: sequelize.QueryTypes.SELECT });
+
+  if (files.length > 0) {
+    const file = files[0].file;
+
+    const JsZip = require('jszip');
+    var zip = new JsZip();
+    zip.file(files[0].originalname, file);
+
+    const zippedFile = await zip.generateAsync({ type: "nodebuffer" });
+
+    sequelize.options.logging = false;
+    await sequelize.query(
+      'UPDATE files f SET file = BINARY(?), zipped = true WHERE f.id = ?',
+      {
+        replacements: [zippedFile, files[0].id],
+        type: sequelize.QueryTypes.UPDATE,
+      });
+    sequelize.options.logging = true;
+  }
+
+  return res.send({compressed: files.length}, 200);
 });
 
 app.listen(port, () => console.log(`Instashare listening on port ${port}!`));
+
+const cron = require('node-cron');
+
+cron.schedule('* * * * *', async () => {
+  console.log('Schedule running');
+});
