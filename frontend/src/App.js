@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './App.css';
 import { Header } from './components/Header';
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
+  Link, Redirect,
 } from 'react-router-dom';
-import { UserProvider } from './contexts/UserContext';
+import { UserContext, UserProvider } from './contexts/UserContext';
 import { Upload } from './components/Upload';
 import { PublicFileTable } from './components/PublicFileTable';
+import { UserProfile } from './components/UserProfile';
 
 function App () {
+  const LoggedInRoute = (props) => {
+    const {user} = useContext(UserContext);
+    console.log('user', user);
+    if (!user) {
+      return <Redirect to={'/'}/>;
+    }
+    return <Route {...props} />;
+  };
   return (
     <UserProvider>
       <Router>
@@ -22,9 +31,12 @@ function App () {
               <Route exact path="/">
                 <PublicFileTable />
               </Route>
-              <Route exact path="/user/files">
+              <LoggedInRoute exact path="/user/files">
                 <Upload />
-              </Route>
+              </LoggedInRoute>
+              <LoggedInRoute exact path="/user">
+                <UserProfile />
+              </LoggedInRoute>
               <Route exact path="/about">
                 About
               </Route>
