@@ -79,7 +79,7 @@ app.post('/register', async (req, res) => {
       type: Sequelize.QueryTypes.INSERT,
     });
 
-  res.sendStatus(200);
+  res.sendStatus(201);
 });
 
 app.post('/user/files', authenticate, upload.single('image'),
