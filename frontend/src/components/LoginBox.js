@@ -5,7 +5,6 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import Alert from 'react-bootstrap/Alert';
-import { Link } from 'react-router-dom';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
@@ -49,9 +48,11 @@ export const LoginBox = () => {
 
   const LogOutButton = () => {
     if (user) {
-      return <div><Link to={'/user'}>{user.name || user.username}</Link><Button
-        onClick={logOut}>Logout</Button>
-      </div>;
+      return (
+        <div>
+          <Button onClick={logOut}>Logout</Button>
+        </div>
+      );
     }
     return null;
   };

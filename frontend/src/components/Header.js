@@ -9,13 +9,14 @@ export const Header = () => {
 
     return (
       <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="#home">Instashare</Navbar.Brand>
+        <Navbar.Brand href="/">Instashare</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
             <Nav.Link href="/">Files</Nav.Link>
             {user && <Nav.Link href="/user/files">My Files</Nav.Link>}
             <Nav.Link href="/about">About</Nav.Link>
+            {user && <Nav.Link href={'/user'}>Profile ({user.name || user.username})</Nav.Link>}
           </Nav>
         </Navbar.Collapse>
         <LoginBox/>

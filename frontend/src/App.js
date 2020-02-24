@@ -38,7 +38,7 @@ function App () {
                 <UserProfile />
               </LoggedInRoute>
               <Route exact path="/about">
-                About
+                Instashare is...
               </Route>
             </Switch>
           </div>
