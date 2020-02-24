@@ -10,13 +10,13 @@ export const UserProvider = ({ children }) => {
     if (value === 'null') {
       return null;
     }
-    return value;
+    return JSON.parse(value);
   };
 
   const [user, setUser] = useState(getValueFromStorage('user'));
   const [token, setToken] = useState(getValueFromStorage('token'));
   const setAndPersistToken = token => {
-    window.localStorage.setItem('token', token);
+    window.localStorage.setItem('token', JSON.stringify(token));
     setToken(token);
   };
   const setAndPersistUser = user => {

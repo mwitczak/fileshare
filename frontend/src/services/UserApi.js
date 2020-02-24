@@ -13,3 +13,14 @@ export const registerCall = async (username, password) => {
 
   return registerResponse.data;
 };
+
+export const updateUserNameCall = async (token, name) => {
+  const registerResponse = await axios.patch('http://localhost:8080/user',
+    { name }, {
+      headers: {
+        token: token,
+      },
+    });
+
+  return registerResponse.data;
+};

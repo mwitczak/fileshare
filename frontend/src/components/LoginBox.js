@@ -47,7 +47,7 @@ export const LoginBox = () => {
 
   const LogOutButton = () => {
     if (user) {
-      return <div><Link to={'/user'}>test{user.name}</Link><Button onClick={logOut}>Logout</Button>
+      return <div><Link to={'/user'}>{user.name || user.username}</Link><Button onClick={logOut}>Logout</Button>
       </div>;
     }
     return null;

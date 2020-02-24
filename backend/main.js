@@ -52,8 +52,22 @@ const authenticate = (req, res, next) => {
 app.get('/', (req, res) => res.send('Instashare backend.'));
 
 app.get('/user', authenticate, async (req, res) => {
-  const {id, name, username, token} = req.user;
-  res.send({id, name, username, token}, 200);
+  const { id, name, username, token } = req.user;
+  res.send({ id, name, username, token }, 200);
+});
+
+app.patch('/user', authenticate, async (req, res) => {
+  const { user } = req.user;
+  const { name } = req.body;
+
+  await sequelize.query(
+    'UPDATE users u SET name = ? WHERE u.id = ?',
+    {
+      replacements: [name, user],
+      type: sequelize.QueryTypes.UPDATE,
+    });
+
+  res.send(200);
 });
 
 app.post('/login', async (req, res) => {
@@ -64,7 +78,8 @@ app.post('/login', async (req, res) => {
     { replacements: [username], type: sequelize.QueryTypes.SELECT });
 
   if (users.length === 0) {
-    res.send({errorMessage: 'Incorrect credentials or user does not exist'}, 403);
+    res.send({ errorMessage: 'Incorrect credentials or user does not exist' },
+      403);
   }
 
   const user = users[0];
@@ -72,7 +87,8 @@ app.post('/login', async (req, res) => {
   const correctCredentials = passwordHash.verify(password, user['password']);
 
   if (!correctCredentials) {
-    res.send({errorMessage: 'Incorrect credentials or user does not exist'}, 403);
+    res.send({ errorMessage: 'Incorrect credentials or user does not exist' },
+      403);
   }
 
   const token = crypto.randomBytes(32).toString('hex');
@@ -91,7 +107,7 @@ app.post('/register', async (req, res) => {
     { replacements: [username], type: sequelize.QueryTypes.SELECT });
 
   if (users.length === 1) {
-    res.send({errorMessage: 'User already exists'}, 422);
+    res.send({ errorMessage: 'User already exists' }, 422);
   }
 
   await sequelize.query('INSERT INTO users (username, password) VALUES (?, ?)',
