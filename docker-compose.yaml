@@ -7,6 +7,10 @@ services:
       - "8080:8080"
     volumes:
       - ./backend:/app
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: example
+      MYSQL_DATABASE: instashare
   frontend:
     build:
       context: ./frontend
