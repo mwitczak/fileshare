@@ -1,9 +1,12 @@
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-import React from 'react';
+import React, { useContext } from 'react';
 import { LoginBox } from './LoginBox';
+import { UserContext } from '../contexts/UserContext';
 
 export const Header = () => {
+    const { user } = useContext(UserContext);
+
     return (
       <Navbar bg="light" expand="lg">
         <Navbar.Brand href="#home">Instashare</Navbar.Brand>
@@ -11,7 +14,7 @@ export const Header = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
             <Nav.Link href="/">Files</Nav.Link>
-            <Nav.Link href="/user/files">My Files</Nav.Link>
+            {user && <Nav.Link href="/user/files">My Files</Nav.Link>}
             <Nav.Link href="/about">About</Nav.Link>
           </Nav>
         </Navbar.Collapse>

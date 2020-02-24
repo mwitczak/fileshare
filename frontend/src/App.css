@@ -5,3 +5,16 @@
     max-width: 1024px;
     margin: 0 auto;
 }
+
+.filebox {
+    text-align: center;
+    padding: 25px;
+}
+
+.fileDescription {
+    min-height: 150px;
+}
+
+.row {
+    margin: 15px 0;
+}

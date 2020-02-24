@@ -8,7 +8,7 @@ export const getPublicFilesCall = async (token) => {
     },
   });
 
-  return filesResponse.data;
+  return filesResponse.data.filter(file => file.zipped);
 };
 
 export const getFilesCall = async (token) => {

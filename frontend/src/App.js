@@ -8,7 +8,7 @@ import {
   Link, Redirect,
 } from 'react-router-dom';
 import { UserContext, UserProvider } from './contexts/UserContext';
-import { Upload } from './components/Upload';
+import { UserFiles } from './components/UserFiles';
 import { PublicFileTable } from './components/PublicFileTable';
 import { UserProfile } from './components/UserProfile';
 
@@ -32,7 +32,7 @@ function App () {
                 <PublicFileTable />
               </Route>
               <LoggedInRoute exact path="/user/files">
-                <Upload />
+                <UserFiles />
               </LoggedInRoute>
               <LoggedInRoute exact path="/user">
                 <UserProfile />

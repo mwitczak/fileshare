@@ -1,13 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
 import FormControl from 'react-bootstrap/FormControl';
-import FormGroup from 'react-bootstrap/FormGroup';
 import Button from 'react-bootstrap/Button';
 import { UserContext } from '../contexts/UserContext';
 import Container from 'react-bootstrap/Container';
-import { getFilesCall, deleteFileCall, uploadFileCall } from '../services/FileApi';
+import {
+  getFilesCall,
+  deleteFileCall,
+  uploadFileCall,
+} from '../services/FileApi';
 import { FileTable } from './FileTable';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-export const Upload = () => {
+export const UserFiles = () => {
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);
   const { token } = useContext(UserContext);
@@ -31,11 +36,18 @@ export const Upload = () => {
 
   return (
     <Container>
-      <FormGroup>
-        <FormControl type={'file'} onChange={e => setFile(e.target.files[0])}/>
-        <Button variant={'primary'} onClick={uploadFile}>Upload</Button>
-      </FormGroup>
-      <FileTable files={files} deleteFile={deleteFile}/>
+      <Row>
+        <Col sm={3}>
+          <FormControl type={'file'}
+                       onChange={e => setFile(e.target.files[0])}/>
+        </Col>
+        <Col sm={3}>
+          <Button variant={'primary'} onClick={uploadFile}>Upload</Button>
+        </Col>
+      </Row>
+      <Row>
+        <FileTable files={files} deleteFile={deleteFile}/>
+      </Row>
     </Container>
   );
 };

@@ -6,6 +6,8 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import Alert from 'react-bootstrap/Alert';
 import { Link } from 'react-router-dom';
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
 
 export const LoginBox = () => {
   const [username, setUsername] = useState(null);
@@ -47,7 +49,8 @@ export const LoginBox = () => {
 
   const LogOutButton = () => {
     if (user) {
-      return <div><Link to={'/user'}>{user.name || user.username}</Link><Button onClick={logOut}>Logout</Button>
+      return <div><Link to={'/user'}>{user.name || user.username}</Link><Button
+        onClick={logOut}>Logout</Button>
       </div>;
     }
     return null;
@@ -56,27 +59,38 @@ export const LoginBox = () => {
   const UserBox = (
     <Form inline>
       {error && <Alert variant={'danger'}>{error}</Alert>}
-      <FormControl
-        type="text"
-        placeholder="Username"
-        aria-label="Username"
-        onChange={e => setUsername(e.target.value)}
-        minLength={3}
-      />
-      <FormControl
-        type="password"
-        placeholder="Password"
-        aria-label="Password"
-        onChange={e => setPassword(e.target.value)}
-        minLength={6}
-      />
-      <Button variant={'primary'} onClick={logIn}>Login</Button>
-      <Button variant={'secondary'} onClick={register}>Register</Button>
+      <Row>
+        <Col>
+          <FormControl
+            type="text"
+            placeholder="Username"
+            aria-label="Username"
+            onChange={e => setUsername(e.target.value)}
+            minLength={3}
+          />
+        </Col>
+        <Col>
+          <FormControl
+            type="password"
+            placeholder="Password"
+            aria-label="Password"
+            onChange={e => setPassword(e.target.value)}
+            minLength={6}
+          />
+        </Col>
+        <Col>
+          <Button variant={'primary'} onClick={logIn}>Login</Button>
+        </Col>
+        <Col>
+          <Button variant={'secondary'} onClick={register}>Register</Button>
+        </Col>
+      </Row>
     </Form>
   );
 
-  return <div>
-    <LogOutButton/>
-    {!user && UserBox}
-  </div>;
+  if (user) {
+    return <LogOutButton/>;
+  }
+
+  return UserBox;
 };
