@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../Config';
 
 export const UserContext = React.createContext({});
 const { Provider } = UserContext;
@@ -31,7 +32,7 @@ export const UserProvider = ({ children }) => {
 
       async function getData () {
         try {
-          const userResponse = await axios.get('http://localhost:8080/user',
+          const userResponse = await axios.get(`${API_URL}/user`,
             { headers: { token: token } });
           setAndPersistUser(userResponse.data);
         } catch (e) {

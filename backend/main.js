@@ -1,3 +1,4 @@
+const Sequelize = require('sequelize');
 const express = require('express');
 const passwordHash = require('password-hash');
 const crypto = require('crypto');

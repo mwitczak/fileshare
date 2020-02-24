@@ -4,6 +4,7 @@ import React, { useContext, useState } from 'react';
 import FormControl from 'react-bootstrap/FormControl';
 import { UserContext } from '../contexts/UserContext';
 import { updateFileCall } from '../services/FileApi';
+import { API_URL } from '../Config';
 
 export const FileTable = ({ files, deleteFile, isPublic }) => {
   const { token } = useContext(UserContext);
@@ -13,7 +14,7 @@ export const FileTable = ({ files, deleteFile, isPublic }) => {
       return 'File processing in progress...';
     }
     return (<Button
-      onClick={() => window.open(`http://localhost:8080/files/${file.id}`,
+      onClick={() => window.open(`${API_URL}/files/${file.id}`,
         '_blank')}>Download</Button>);
   };
 
