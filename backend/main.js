@@ -52,7 +52,8 @@ const authenticate = (req, res, next) => {
 app.get('/', (req, res) => res.send('Instashare backend.'));
 
 app.get('/user', authenticate, async (req, res) => {
-  res.send(req.user, 200);
+  const {id, name, username, token} = req.user;
+  res.send({id, name, username, token}, 200);
 });
 
 app.post('/login', async (req, res) => {
@@ -63,7 +64,7 @@ app.post('/login', async (req, res) => {
     { replacements: [username], type: sequelize.QueryTypes.SELECT });
 
   if (users.length === 0) {
-    res.sendStatus(403);
+    res.send({errorMessage: 'Incorrect credentials or user does not exist'}, 403);
   }
 
   const user = users[0];
@@ -71,7 +72,7 @@ app.post('/login', async (req, res) => {
   const correctCredentials = passwordHash.verify(password, user['password']);
 
   if (!correctCredentials) {
-    res.sendStatus(403);
+    res.send({errorMessage: 'Incorrect credentials or user does not exist'}, 403);
   }
 
   const token = crypto.randomBytes(32).toString('hex');
@@ -90,7 +91,7 @@ app.post('/register', async (req, res) => {
     { replacements: [username], type: sequelize.QueryTypes.SELECT });
 
   if (users.length === 1) {
-    res.send({ error: 'User already exists' }, 422);
+    res.send({errorMessage: 'User already exists'}, 422);
   }
 
   await sequelize.query('INSERT INTO users (username, password) VALUES (?, ?)',
@@ -102,24 +103,25 @@ app.post('/register', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.post('/user/files', authenticate, upload.single('image'), async (req, res) => {
-  sequelize.options.logging = false;
-  await sequelize.query(
-    'INSERT INTO files (user, file, originalname, mimetype) VALUES (?, BINARY(?), ?, ?)',
-    {
-      replacements: [
-        req.user.user,
-        req.file.buffer,
-        req.file.originalname,
-        req.file.mimetype], type: sequelize.QueryTypes.INSERT,
-    });
-  sequelize.options.logging = true;
-  res.sendStatus(200);
-});
+app.post('/user/files', authenticate, upload.single('image'),
+  async (req, res) => {
+    sequelize.options.logging = false;
+    await sequelize.query(
+      'INSERT INTO files (user, file, originalname, mimetype) VALUES (?, BINARY(?), ?, ?)',
+      {
+        replacements: [
+          req.user.user,
+          req.file.buffer,
+          req.file.originalname,
+          req.file.mimetype], type: sequelize.QueryTypes.INSERT,
+      });
+    sequelize.options.logging = true;
+    res.sendStatus(200);
+  });
 
 app.get('/user/files', authenticate, async (req, res) => {
   const files = await sequelize.query(
-    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size FROM files f WHERE f.user = ?',
+    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped FROM files f WHERE f.user = ?',
     { replacements: [req.user.user], type: sequelize.QueryTypes.SELECT });
 
   res.send(files);
@@ -128,13 +130,16 @@ app.get('/user/files', authenticate, async (req, res) => {
 app.delete('/user/files/:id', authenticate, async (req, res) => {
   await sequelize.query(
     'DELETE FROM files f WHERE f.id = ? AND f.user = ?',
-    { replacements: [req.param('id'), req.user.user], type: sequelize.QueryTypes.DELETE });
+    {
+      replacements: [req.param('id'), req.user.user],
+      type: sequelize.QueryTypes.DELETE,
+    });
   res.sendStatus(200);
 });
 
 app.get('/files', async (req, res) => {
   const files = await sequelize.query(
-    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size FROM files f',
+    'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped FROM files f',
     { type: sequelize.QueryTypes.SELECT });
 
   res.send(files);
@@ -142,7 +147,7 @@ app.get('/files', async (req, res) => {
 
 app.get('/files/:id', async (req, res) => {
   const files = await sequelize.query(
-    'SELECT file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE f.id = ?',
+    'SELECT file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE f.id = ? AND zipped = true',
     { replacements: [req.param('id')], type: sequelize.QueryTypes.SELECT });
 
   const file = files[0].file;
@@ -151,9 +156,9 @@ app.get('/files/:id', async (req, res) => {
     //.attachment(files[0].originalname)
     //type(files[0].mimetype)
     //send(files[0].file);
-    .attachment(files[0].originalname + ".zip")
-    .type('application/zip')
-    .send(file);
+    .attachment(files[0].originalname + '.zip').
+    type('application/zip').
+    send(file);
 });
 
 app.get('/compress', async (req, res) => {
@@ -168,7 +173,7 @@ app.get('/compress', async (req, res) => {
     var zip = new JsZip();
     zip.file(files[0].originalname, file);
 
-    const zippedFile = await zip.generateAsync({ type: "nodebuffer" });
+    const zippedFile = await zip.generateAsync({ type: 'nodebuffer' });
 
     sequelize.options.logging = false;
     await sequelize.query(
@@ -180,7 +185,7 @@ app.get('/compress', async (req, res) => {
     sequelize.options.logging = true;
   }
 
-  return res.send({compressed: files.length}, 200);
+  return res.send({ compressed: files.length }, 200);
 });
 
 app.listen(port, () => console.log(`Instashare listening on port ${port}!`));
@@ -188,5 +193,30 @@ app.listen(port, () => console.log(`Instashare listening on port ${port}!`));
 const cron = require('node-cron');
 
 cron.schedule('* * * * *', async () => {
-  console.log('Schedule running');
+  console.log('Compression running...');
+
+  const files = await sequelize.query(
+    'SELECT id, file, OCTET_LENGTH(file) as size, mimetype, originalname FROM files f WHERE zipped = false',
+    { type: sequelize.QueryTypes.SELECT });
+
+  if (files.length > 0) {
+    const JsZip = require('jszip');
+    for (file of files) {
+      var zip = new JsZip();
+      zip.file(file.originalname, file.file);
+
+      const zippedFile = await zip.generateAsync({ type: 'nodebuffer' });
+
+      sequelize.options.logging = false;
+      await sequelize.query(
+        'UPDATE files f SET file = BINARY(?), zipped = true WHERE f.id = ?',
+        {
+          replacements: [zippedFile, file.id],
+          type: sequelize.QueryTypes.UPDATE,
+        });
+      sequelize.options.logging = true;
+    }
+  }
+
+  console.log('Processed ' + files.length);
 });
