@@ -6,6 +6,7 @@
 - yarn 
 
 ## Development environment
+- build docker containers `docker-compose build`
 - run the docker-compose environment: `docker-compose up`
 - run database migrations in different window  
 `cd backend`  
