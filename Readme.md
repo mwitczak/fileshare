@@ -42,6 +42,7 @@
 - add more integration tests for API endpoints
 - add more logging on the backend side
 - move db query logic from backend main.js to service/model
+- improve handling of big files - currently it fails because of max_allowed_packets error
 
 ## Author
 Martin Witczak  
