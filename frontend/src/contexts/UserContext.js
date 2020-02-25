@@ -26,7 +26,6 @@ export const UserProvider = ({ children }) => {
   };
   useEffect(() => {
       if (user != null) {
-        console.log('user not null', user);
         return;
       }
 
@@ -37,7 +36,6 @@ export const UserProvider = ({ children }) => {
           setAndPersistUser(userResponse.data);
         } catch (e) {
           setAndPersistUser(null);
-          console.log('e', e);
         }
       }
 

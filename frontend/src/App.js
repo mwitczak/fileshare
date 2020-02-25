@@ -15,7 +15,6 @@ import { UserProfile } from './components/UserProfile';
 function App () {
   const LoggedInRoute = (props) => {
     const {user} = useContext(UserContext);
-    console.log('user', user);
     if (!user) {
       return <Redirect to={'/'}/>;
     }
