@@ -39,6 +39,7 @@
 - write snapshots tests for components
 - add flash messages for success, failure for every action
 - move compression job to separate docker container so backend service is independent and can be scaled
+- change from cron to queue worker so there is no need to wait one minute for compression cron
 - add more integration tests for API endpoints
 - add more logging on the backend side
 - move db query logic from backend main.js to service/model
