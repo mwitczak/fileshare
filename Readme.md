@@ -41,6 +41,7 @@
 - move compression job to separate docker container so backend service is independent and can be scaled
 - add more integration tests for API endpoints
 - add more logging on the backend side
+- move db query logic from backend main.js to service/model
 
 ## Author
 Martin Witczak  
