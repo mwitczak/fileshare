@@ -1,5 +1,7 @@
 # Fileshare
 
+Currently its a project in progress, aimed for learning and practice.
+
 ## Requirements
 - docker-compose >= 1.25.3
 - node >= 10 LTS
