@@ -9,7 +9,7 @@ export const Header = () => {
 
     return (
       <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="/">Instashare</Navbar.Brand>
+        <Navbar.Brand href="/">Fileshare</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">

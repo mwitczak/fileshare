@@ -3,6 +3,6 @@
     "driver": "mysql",
     "user": "root",
     "password": "example",
-    "database": "instashare"
+    "database": "fileshare"
   }
 }

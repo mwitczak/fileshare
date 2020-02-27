@@ -10,7 +10,7 @@ services:
     environment:
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: example
-      MYSQL_DATABASE: instashare
+      MYSQL_DATABASE: fileshare
   frontend:
     build:
       context: ./frontend
@@ -27,7 +27,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: instashare
+      MYSQL_DATABASE: fileshare
     ports:
     - 3306:3306
 

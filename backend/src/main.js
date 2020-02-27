@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 const port = 8080;
 
-app.get('/', (req, res) => res.send('Instashare backend.'));
+app.get('/', (req, res) => res.send('Fileshare backend.'));
 
 app.get('/user', authenticate, async (req, res) => {
   const { id, name, username, token } = req.user;
@@ -157,7 +157,7 @@ app.patch('/files/:id', authenticate, async (req, res) => {
   res.send(200);
 });
 
-app.listen(port, () => console.log(`Instashare listening on port ${port}!`));
+app.listen(port, () => console.log(`Fileshare listening on port ${port}!`));
 
 const compressionJob = require('./job');
 compressionJob();
