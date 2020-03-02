@@ -1,0 +1,100 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: null
+  name: fileshare.aws.martinwitczak.com
+spec:
+  api:
+    dns: {}
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://kubernetes.martinwitczak.com/fileshare.aws.martinwitczak.com
+  dnsZone: aws.martinwitczak.com
+  etcdClusters:
+  - cpuRequest: 200m
+    etcdMembers:
+    - instanceGroup: master-eu-central-1c
+      name: c
+      volumeSize: 2
+    memoryRequest: 100Mi
+    name: main
+  - cpuRequest: 100m
+    etcdMembers:
+    - instanceGroup: master-eu-central-1c
+      name: c
+      volumeSize: 2
+    memoryRequest: 100Mi
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubelet:
+    anonymousAuth: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  kubernetesVersion: 1.17.3
+  masterPublicName: api.fileshare.aws.martinwitczak.com
+  networkCIDR: 172.20.0.0/16
+  networking:
+    kubenet: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  subnets:
+  - cidr: 172.20.32.0/19
+    name: eu-central-1c
+    type: Public
+    zone: eu-central-1c
+  topology:
+    dns:
+      type: Public
+    masters: public
+    nodes: public
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: fileshare.aws.martinwitczak.com
+  name: master-eu-central-1c
+spec:
+  image: kope.io/k8s-1.17-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t3a.micro
+  maxSize: 1
+  minSize: 1
+  rootVolumeSize: 10
+  rootVolumeType: gp2
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-eu-central-1c
+  role: Master
+  subnets:
+  - eu-central-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: fileshare.aws.martinwitczak.com
+  name: nodes
+spec:
+  image: kope.io/k8s-1.17-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t3a.micro
+  maxSize: 2
+  minSize: 2
+  rootVolumeSize: 10
+  rootVolumeType: standard
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes
+    spot: "true"
+  maxPrice: "0.004"
+  role: Node
+  subnets:
+  - eu-central-1c
