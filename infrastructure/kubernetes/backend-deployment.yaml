@@ -17,5 +17,17 @@ spec:
       containers:
         - name: backend
           image: 832812833683.dkr.ecr.eu-central-1.amazonaws.com/fileshare:backend
+          imagePullPolicy: "Always"
+          env:
+            - name: BASE_URL
+              value: /backend
+            - name: MYSQL_USERNAME
+              value: root
+            - name: MYSQL_PASSWORD
+              value: testtest
+            - name: MYSQL_DATABASE
+              value: fileshare
+            - name: MYSQL_HOST
+              value: database-mariadb.default.svc.cluster.local
           ports:
             - containerPort: 8080

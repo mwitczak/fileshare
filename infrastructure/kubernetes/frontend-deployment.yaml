@@ -17,5 +17,9 @@ spec:
       containers:
         - name: frontend
           image: 832812833683.dkr.ecr.eu-central-1.amazonaws.com/fileshare:frontend
+          imagePullPolicy: "Always"
+          env:
+            - name: REACT_APP_API_URL
+              value: /backend
           ports:
             - containerPort: 3000

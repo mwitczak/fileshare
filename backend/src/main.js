@@ -12,14 +12,16 @@ app.use(express.json());
 app.use(cors());
 const port = 8080;
 
-app.get('/', (req, res) => res.send('Fileshare backend.'));
+const router = express.Router();
 
-app.get('/user', authenticate, async (req, res) => {
+router.get('/', (req, res) => res.send('Fileshare backend.'));
+
+router.get('/user', authenticate, async (req, res) => {
   const { id, name, username, token } = req.user;
   res.send({ id, name, username, token }, 200);
 });
 
-app.patch('/user', authenticate, async (req, res) => {
+router.patch('/user', authenticate, async (req, res) => {
   const { user } = req.user;
   const { name } = req.body;
 
@@ -33,7 +35,7 @@ app.patch('/user', authenticate, async (req, res) => {
   res.send(200);
 });
 
-app.post('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   const users = await db.query(
@@ -62,7 +64,7 @@ app.post('/login', async (req, res) => {
   res.send({ token: token }, 200);
 });
 
-app.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
   const users = await db.query(
@@ -82,7 +84,7 @@ app.post('/register', async (req, res) => {
   res.sendStatus(201);
 });
 
-app.post('/user/files', authenticate, upload.single('image'),
+router.post('/user/files', authenticate, upload.single('image'),
   async (req, res) => {
     db.options.logging = false;
     await db.query(
@@ -98,7 +100,7 @@ app.post('/user/files', authenticate, upload.single('image'),
     res.sendStatus(200);
   });
 
-app.get('/user/files', authenticate, async (req, res) => {
+router.get('/user/files', authenticate, async (req, res) => {
   const files = await db.query(
     'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped, description FROM files f WHERE f.user = ?',
     { replacements: [req.user.user], type: db.QueryTypes.SELECT });
@@ -106,17 +108,17 @@ app.get('/user/files', authenticate, async (req, res) => {
   res.send(files);
 });
 
-app.delete('/user/files/:id', authenticate, async (req, res) => {
+router.delete('/user/files/:id', authenticate, async (req, res) => {
   await db.query(
-    'DELETE FROM files f WHERE f.id = ? AND f.user = ?',
+    'DELETE FROM files WHERE id = ? AND user = ?',
     {
-      replacements: [req.param('id'), req.user.user],
+      replacements: [parseInt(req.param('id')), parseInt(req.user.user)],
       type: db.QueryTypes.DELETE,
     });
   res.sendStatus(200);
 });
 
-app.get('/files', async (req, res) => {
+router.get('/files', async (req, res) => {
   const files = await db.query(
     'SELECT id, originalname, mimetype, OCTET_LENGTH(file) as size, zipped, description FROM files f',
     { type: db.QueryTypes.SELECT });
@@ -124,7 +126,7 @@ app.get('/files', async (req, res) => {
   res.send(files);
 });
 
-app.get('/files/:id', async (req, res) => {
+router.get('/files/:id', async (req, res) => {
   const fileId = req.param('id');
 
   const files = await db.query(
@@ -142,7 +144,7 @@ app.get('/files/:id', async (req, res) => {
     .send(file.content);
 });
 
-app.patch('/files/:id', authenticate, async (req, res) => {
+router.patch('/files/:id', authenticate, async (req, res) => {
   const { user } = req.user;
   const id = req.param('id');
   const { description } = req.body;
@@ -156,6 +158,8 @@ app.patch('/files/:id', authenticate, async (req, res) => {
 
   res.send(200);
 });
+
+app.use(process.env.BASE_URL || '/backend', router);
 
 app.listen(port, () => console.log(`Fileshare listening on port ${port}!`));
 

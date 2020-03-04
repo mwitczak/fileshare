@@ -11,6 +11,7 @@ services:
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: example
       MYSQL_DATABASE: fileshare
+      MYSQL_HOST: db
   frontend:
     build:
       context: ./frontend
