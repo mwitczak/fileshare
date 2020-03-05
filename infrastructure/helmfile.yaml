@@ -1,0 +1,25 @@
+releases:
+  - name: "loadbalancing"
+    namespace: "default"
+    labels:
+      chart: "nginx-ingress"
+      repo: "stable"
+    chart: "stable/nginx-ingress"
+    set:
+      - name: "controller.replicaCount"
+        value: 2
+  - name: "database"
+    namespace: "default"
+    labels:
+      chart: "database"
+      repo: "stable"
+    chart: "stable/mariadb"
+    set:
+      - name: "master.persistence.size"
+        value: "1Gi"
+      - name: "slave.persistence.size"
+        value: "1Gi"
+      - name: "rootUser.password"
+        value: {{ requiredEnv "DB_PASSWORD" }}
+      - name: "db.name"
+        value: "fileshare"
